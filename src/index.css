@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  font-family: Inter, sans-serif;
+  background: #07110D;
+  color: #F3F5F4;
+}
+
+body {
+  margin: 0;
+  background: #07110D;
+  color: #F3F5F4;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.section-container {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.glass-panel {
+  background: rgba(16, 31, 25, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border: 1px solid rgba(82, 122, 105, 0.22);
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.32),
+    inset 0 1px rgba(255,255,255,0.04);
+}
+
+.command-glow {
+  box-shadow:
+    0 0 80px rgba(92, 148, 117, 0.12),
+    0 0 180px rgba(92, 148, 117, 0.08);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+
+  background-size: 80px 80px;
+}
+
+.card-hover {
+  transition:
+    transform 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+
+  border-color: rgba(122, 184, 152, 0.3);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35),
+    0 0 40px rgba(98, 155, 123, 0.08);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A1511;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #234236;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #315847;
+}
