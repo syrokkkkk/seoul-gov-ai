@@ -1,494 +1,900 @@
+import { useState } from "react";
+
 import {
   MapContainer,
   TileLayer,
-  Circle,
-  Marker,
+  CircleMarker,
   Popup,
   Polyline,
+  Circle,
 } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
 
 import {
-  Factory,
-  Building2,
   Trees,
-  Construction,
+  Wind,
   ShieldAlert,
-  MapPinned,
-  School,
-  Hospital,
 } from "lucide-react";
 
-const restrictedZones = [
-  {
-    name: "Gangnam High Exposure Zone",
-    position: [37.4979, 127.0276],
-    color: "#D96C5C",
-    radius: 1200,
-    status: "Restricted",
-    recommendation: "Avoid dense residential expansion",
-    planningScore: "22/100",
-    buildType: "Avoid residential towers",
-  },
-  {
-    name: "Jongno Traffic Corridor",
-    position: [37.5729, 126.9794],
-    color: "#D96C5C",
-    radius: 950,
-    status: "High Emissions",
-    recommendation: "Reduce commercial traffic load",
-    planningScore: "31/100",
-    buildType: "Limited redevelopment only",
-  },
-  {
-    name: "Yongsan Construction Pressure",
-    position: [37.5311, 126.981],
-    color: "#E2B55D",
-    radius: 850,
-    status: "Moderate",
-    recommendation: "Limited mixed-use construction",
-    planningScore: "54/100",
-    buildType: "Controlled mixed-use zoning",
-  },
-  {
-    name: "Yeouido Financial District",
-    position: [37.5219, 126.9245],
-    color: "#E2B55D",
-    radius: 700,
-    status: "Monitoring",
-    recommendation: "Expand pedestrian corridors",
-    planningScore: "63/100",
-    buildType: "Transit-oriented offices",
-  },
-  {
-    name: "Mapo Green Development",
-    position: [37.5637, 126.9084],
-    color: "#5FA57B",
-    radius: 1300,
-    status: "Recommended",
-    recommendation: "Priority eco-development zone",
-    planningScore: "88/100",
-    buildType: "Eco-residential development",
-  },
-  {
-    name: "Seoul Forest Airflow Corridor",
-    position: [37.5444, 127.0374],
-    color: "#5FA57B",
-    radius: 1100,
-    status: "Optimal",
-    recommendation: "Green corridor preservation",
-    planningScore: "94/100",
-    buildType: "Low-density sustainable housing",
-  },
-];
+import { seoulZones } from "../../data/seoulZones";
+import { analyzeInfrastructure } from "../../utils/planningEngine";
 
-const aiRoutes = [
-  [37.5665, 126.978],
-  [37.558, 126.99],
-  [37.548, 127.01],
-  [37.538, 127.03],
-  [37.53, 127.05],
-];
-
-const planningPoints = [
-  {
-    title: "High-Density Residential",
-    type: "Restricted",
-    position: [37.4979, 127.0276],
-    impact: "High population density + pollution trapping risk",
-  },
-  {
-    title: "Green Mobility Corridor",
-    type: "Recommended",
-    position: [37.5637, 126.9084],
-    impact: "Optimal for airflow and low-emission transport",
-  },
-  {
-    title: "Hospital Protection Zone",
-    type: "Protected",
-    position: [37.5796, 126.977],
-    impact: "Construction restrictions required near hospitals",
-  },
-  {
-    title: "Commercial Redevelopment",
-    type: "Moderate",
-    position: [37.5219, 126.9245],
-    impact: "Suitable for moderate office expansion",
-  },
-  {
-    title: "Industrial Expansion",
-    type: "Restricted",
-    position: [37.5311, 126.981],
-    impact: "Industrial growth may increase PM2.5 concentration",
-  },
-  {
-    title: "Eco Residential Zone",
-    type: "Optimal",
-    position: [37.5444, 127.0374],
-    impact: "Best low-density housing development zone",
-  },
-  {
-    title: "Transit-Oriented Development",
-    type: "Recommended",
-    position: [37.5651, 127.0011],
-    impact: "Supports reduced car dependency and cleaner mobility",
-  },
-  {
-    title: "School Safety Buffer",
-    type: "Protected",
-    position: [37.5512, 126.9882],
-    impact: "Prioritize parks and green barriers around schools",
-  },
+const infrastructureTypes = [
+  "Hospital",
+  "School",
+  "Factory",
+  "Shopping Mall",
+  "Residential Tower",
+  "Subway Station",
+  "Public Park",
+  "Data Center",
+  "Logistics Hub",
+  "EV Charging Network",
 ];
 
 export default function UrbanPlanningAI() {
+
+  const [selectedType, setSelectedType] =
+    useState("Hospital");
+
+  const [visitors, setVisitors] =
+    useState(15000);
+
+  const [energy, setEnergy] =
+    useState(240);
+
+  const [greenCoverage, setGreenCoverage] =
+    useState(35);
+
+  const [trafficTolerance, setTrafficTolerance] =
+    useState(50);
+
+  const [analysisVersion, setAnalysisVersion] =
+    useState(0);
+
+  const [isAnalyzing, setIsAnalyzing] =
+    useState(false);
+
+  /*
+  ---------------------------------------
+  AI ANALYSIS
+  ---------------------------------------
+  */
+
+  const analysis =
+    analyzeInfrastructure(
+      selectedType,
+      seoulZones,
+      {
+        visitors,
+        energy,
+        greenCoverage,
+        trafficTolerance,
+        randomness: analysisVersion,
+      }
+    );
+
+  const bestZone = { ...analysis.best };
+  const worstZone = analysis.worst;
+
+  /*
+  ---------------------------------------
+  REALISTIC SCORE
+  ---------------------------------------
+  */
+
+  bestZone.score =
+    Math.max(
+      18,
+      Math.min(
+        100,
+
+        bestZone.score
+
+        - Math.floor(visitors / 4000)
+
+        - Math.floor(energy / 22)
+
+        - Math.floor((100 - greenCoverage) / 3)
+
+        + Math.floor(trafficTolerance / 5)
+
+        + Math.floor(Math.random() * 12 - 6)
+      )
+    );
+
+  /*
+  ---------------------------------------
+  LIVE MAP ZONES
+  ---------------------------------------
+  */
+
+  const liveZones =
+    Array.from({ length: 40 }).map((_, index) => {
+
+      const baseZone =
+        analysis.all[
+          index % analysis.all.length
+        ];
+
+      const randomScore =
+        Math.max(
+          20,
+          Math.min(
+            100,
+            baseZone.score +
+            Math.floor(Math.random() * 35 - 18)
+          )
+        );
+
+      return {
+
+        ...baseZone,
+
+        lat:
+          baseZone.lat +
+          (Math.random() - 0.5) * 0.08,
+
+        lng:
+          baseZone.lng +
+          (Math.random() - 0.5) * 0.08,
+
+        score: randomScore,
+
+      };
+
+    });
+
+  /*
+  ---------------------------------------
+  BEFORE / AFTER
+  ---------------------------------------
+  */
+
+  const beforePollution =
+    bestZone.pollution;
+
+  const afterPollution =
+    Math.max(
+      12,
+      bestZone.pollution -
+      Math.round(greenCoverage * 0.35)
+    );
+
+  const beforeTraffic =
+    bestZone.traffic;
+
+  const afterTraffic =
+    Math.max(
+      10,
+      bestZone.traffic -
+      Math.round(trafficTolerance * 0.3)
+    );
+
+  const beforeAirflow =
+    bestZone.airflow;
+
+  const afterAirflow =
+    Math.min(
+      100,
+      bestZone.airflow +
+      Math.round(greenCoverage * 0.25)
+    );
+
+  /*
+  ---------------------------------------
+  GOVERNMENT DECISION
+  ---------------------------------------
+  */
+
+  let decisionStatus = "APPROVED";
+  let decisionColor = "#67C587";
+
+  if (bestZone.score < 75) {
+    decisionStatus = "REVIEW REQUIRED";
+    decisionColor = "#FFB86B";
+  }
+
+  if (bestZone.score < 55) {
+    decisionStatus = "HIGH RISK";
+    decisionColor = "#FF7B72";
+  }
+
+  if (bestZone.score < 40) {
+    decisionStatus = "REJECTED";
+    decisionColor = "#FF5C5C";
+  }
+
+  /*
+  ---------------------------------------
+  AIRFLOW
+  ---------------------------------------
+  */
+
+  const airflowPath = [
+    [37.51, 126.87],
+    [37.53, 126.92],
+    [37.55, 126.97],
+    [37.57, 127.02],
+    [37.58, 127.08],
+  ];
+
   return (
+
     <section className="relative py-32 overflow-hidden">
 
       <div className="absolute inset-0 grid-overlay opacity-20" />
 
-      <div className="absolute left-[10%] top-[20%] w-[460px] h-[460px] rounded-full bg-[#1B3A2F] blur-[160px] opacity-20" />
+      {[...Array(16)].map((_, index) => (
+
+        <div
+          key={index}
+          className="absolute rounded-full bg-[#FF7B72]/20 blur-xl animate-pulse"
+          style={{
+            width: `${50 + index * 4}px`,
+            height: `${50 + index * 4}px`,
+            top: `${10 + index * 5}%`,
+            left: `${5 + index * 4}%`,
+            animationDelay: `${index * 0.5}s`,
+          }}
+        />
+
+      ))}
 
       <div className="section-container relative z-10">
 
-        <div className="mb-16">
+        <div className="max-w-5xl">
 
           <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full border border-[#29463A] bg-[#10211A]/70 text-[#90B9A4] text-sm uppercase tracking-[0.2em]">
             AI Urban Planning Engine
           </div>
 
-          <h2 className="text-6xl font-bold mt-8 tracking-[-0.04em]">
+          <h2 className="text-6xl font-bold mt-8 tracking-[-0.04em] leading-tight">
             Smart Infrastructure & Construction Planning
           </h2>
 
-          <p className="text-[#80998D] text-xl max-w-4xl mt-8 leading-relaxed">
-            AI-driven spatial planning system for evaluating
-            construction viability, pollution impact,
-            vulnerable population exposure,
-            and environmental sustainability across Seoul.
-          </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10">
+        <div className="grid lg:grid-cols-[420px_1fr] gap-10 mt-20">
 
-          {/* LIVE MAP */}
+          {/* LEFT PANEL */}
 
-          <div className="glass-panel rounded-[40px] p-8 overflow-hidden">
+          <div className="rounded-[40px] bg-[#F4F5F1] p-8 sticky top-10 h-fit">
 
-            <div className="flex items-center justify-between mb-8">
+            <p className="uppercase tracking-[0.18em] text-[#7E8B84] text-sm">
+              Infrastructure Type
+            </p>
+
+            <div className="space-y-4 mt-8">
+
+              {infrastructureTypes.map((item, index) => (
+
+                <button
+                  key={index}
+                  onClick={() => setSelectedType(item)}
+                  className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-300 ${
+                    selectedType === item
+                      ? "bg-[#173127] text-white border-[#173127]"
+                      : "bg-transparent text-[#355046] border-[#D7DDD8]"
+                  }`}
+                >
+                  {item}
+                </button>
+
+              ))}
+
+            </div>
+
+            {/* PARAMETERS */}
+
+            <div className="space-y-8 mt-10">
 
               <div>
-                <p className="uppercase tracking-[0.18em] text-[#8AA79A] text-sm">
-                  Seoul Planning Intelligence Grid
-                </p>
 
-                <h3 className="text-4xl font-bold mt-3">
-                  Real-Time Construction Suitability Map
-                </h3>
-              </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#355046]">
+                    Expected Daily Visitors
+                  </span>
 
-              <div className="px-5 py-3 rounded-full border border-[#315847] bg-[#12211A] text-[#A7D1BA] text-sm">
-                LIVE GEO-AI MODEL
-              </div>
-            </div>
-
-            <div className="rounded-[32px] overflow-hidden border border-[#1E352B] h-[760px]">
-
-              <MapContainer
-                center={[37.5665, 126.978]}
-                zoom={11}
-                scrollWheelZoom={false}
-                className="h-full w-full"
-              >
-                <TileLayer
-                  attribution='&copy; OpenStreetMap contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-
-                {restrictedZones.map((zone) => (
-                  <Circle
-                    key={zone.name}
-                    center={zone.position}
-                    radius={zone.radius}
-                    pathOptions={{
-                      color: zone.color,
-                      fillColor: zone.color,
-                      fillOpacity: 0.35,
-                    }}
-                  >
-                    <Popup>
-                      <div>
-                        <strong>{zone.name}</strong>
-
-                        <br />
-
-                        Status: {zone.status}
-
-                        <br />
-
-                        Planning Score: {zone.planningScore}
-
-                        <br />
-
-                        Recommended Development:
-
-                        <br />
-
-                        {zone.buildType}
-
-                        <br />
-
-                        {zone.recommendation}
-                      </div>
-                    </Popup>
-                  </Circle>
-                ))}
-
-                <Polyline
-                  positions={aiRoutes}
-                  pathOptions={{
-                    color: "#5FA57B",
-                    weight: 8,
-                    dashArray: "16 12",
-                  }}
-                />
-
-                {planningPoints.map((point) => (
-                  <Marker
-                    key={point.title}
-                    position={point.position}
-                  >
-                    <Popup>
-                      <div>
-                        <strong>{point.title}</strong>
-
-                        <br />
-
-                        Zone Type: {point.type}
-
-                        <br />
-
-                        {point.impact}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-            </div>
-          </div>
-
-          {/* RIGHT PANEL */}
-
-          <div className="space-y-8">
-
-            <div className="glass-panel rounded-[32px] p-8">
-
-              <div className="flex items-center gap-5">
-
-                <div className="w-16 h-16 rounded-2xl bg-[#183126] flex items-center justify-center">
-                  <MapPinned className="text-[#8ED6AE]" size={30} />
+                  <span className="font-semibold text-[#173127]">
+                    {visitors.toLocaleString()}
+                  </span>
                 </div>
 
+                <input
+                  type="range"
+                  min="1000"
+                  max="50000"
+                  value={visitors}
+                  onChange={(e) =>
+                    setVisitors(Number(e.target.value))
+                  }
+                  className="w-full mt-4"
+                />
+
+              </div>
+
+              <div>
+
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#355046]">
+                    Estimated Energy Usage
+                  </span>
+
+                  <span className="font-semibold text-[#173127]">
+                    {energy} MWh
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="50"
+                  max="700"
+                  value={energy}
+                  onChange={(e) =>
+                    setEnergy(Number(e.target.value))
+                  }
+                  className="w-full mt-4"
+                />
+
+              </div>
+
+              <div>
+
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#355046]">
+                    Green Coverage
+                  </span>
+
+                  <span className="font-semibold text-[#173127]">
+                    {greenCoverage}%
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={greenCoverage}
+                  onChange={(e) =>
+                    setGreenCoverage(Number(e.target.value))
+                  }
+                  className="w-full mt-4"
+                />
+
+              </div>
+
+              <div>
+
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#355046]">
+                    Traffic Impact Tolerance
+                  </span>
+
+                  <span className="font-semibold text-[#173127]">
+                    {trafficTolerance}%
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={trafficTolerance}
+                  onChange={(e) =>
+                    setTrafficTolerance(Number(e.target.value))
+                  }
+                  className="w-full mt-4"
+                />
+
+              </div>
+
+            </div>
+
+            <button
+              onClick={() => {
+
+                setIsAnalyzing(true);
+
+                setTimeout(() => {
+
+                  setAnalysisVersion(prev => prev + 1);
+
+                  setIsAnalyzing(false);
+
+                }, 1400);
+
+              }}
+              className="w-full mt-10 py-4 rounded-2xl bg-[#173127] text-white font-semibold"
+            >
+
+              {isAnalyzing
+                ? "Analyzing Seoul Infrastructure..."
+                : "Run AI Infrastructure Analysis"}
+
+            </button>
+
+          </div>
+
+          {/* RIGHT */}
+
+          <div className="space-y-10">
+
+            {/* MAP */}
+
+            <div className="rounded-[40px] border border-[#29463A] bg-[#08110D] p-8">
+
+              <div className="flex items-center justify-between">
+
                 <div>
-                  <p className="uppercase tracking-[0.18em] text-[#89A699] text-sm">
-                    Planning Recommendation
+
+                  <p className="uppercase tracking-[0.18em] text-[#8DAA9C] text-sm">
+                    Live Construction Intelligence Map
                   </p>
 
-                  <h3 className="text-3xl font-bold mt-2">
+                  <h3 className="text-4xl font-bold mt-4">
                     AI Planning Suitability Analysis
                   </h3>
+
                 </div>
+
+                <div className="px-5 py-3 rounded-full border border-[#29463A] bg-[#10211A] text-[#8FD6A9] text-sm">
+                  LIVE AI MODEL
+                </div>
+
               </div>
 
-              <p className="text-[#80998D] mt-8 leading-relaxed text-lg">
-                AI evaluates Seoul districts based on pollution accumulation,
-                atmospheric airflow, transportation density,
-                and vulnerable population exposure to determine
-                optimal infrastructure planning zones.
-              </p>
-            </div>
+              <div className="mt-10 rounded-[32px] overflow-hidden border border-[#29463A]">
 
-            <div className="glass-panel rounded-[32px] p-8">
+                <MapContainer
+                  center={[37.5665, 126.9780]}
+                  zoom={11}
+                  style={{
+                    height: "620px",
+                    width: "100%",
+                  }}
+                >
 
-              <div className="grid grid-cols-2 gap-5">
+                  <TileLayer
+                    attribution="OpenStreetMap"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
 
-                <div className="rounded-2xl border border-[#29463A] bg-[#10211A] p-5">
-                  <School className="text-[#9DD7B7]" />
+                  <Polyline
+                    positions={airflowPath}
+                    pathOptions={{
+                      color: "#7BC7FF",
+                      weight: 6,
+                      dashArray: "14 14",
+                    }}
+                  />
 
-                  <h4 className="text-xl font-semibold mt-4">
-                    Schools
-                  </h4>
+                  {liveZones.map((zone, index) => (
 
-                  <p className="text-[#7F998C] mt-3 text-sm">
-                    Protected low-emission education zones.
-                  </p>
-                </div>
+                    <>
+                      <Circle
+                        key={`circle-${index}`}
+                        center={[zone.lat, zone.lng]}
+                        radius={2200}
+                        pathOptions={{
+                          color:
+                            zone.score >= 75
+                              ? "#67C587"
+                              : zone.score >= 50
+                              ? "#FFB86B"
+                              : "#FF7B72",
 
-                <div className="rounded-2xl border border-[#29463A] bg-[#10211A] p-5">
-                  <Hospital className="text-[#8DBFFF]" />
+                          fillColor:
+                            zone.score >= 75
+                              ? "#67C587"
+                              : zone.score >= 50
+                              ? "#FFB86B"
+                              : "#FF7B72",
 
-                  <h4 className="text-xl font-semibold mt-4">
-                    Hospitals
-                  </h4>
+                          fillOpacity: 0.12,
+                          weight: 1,
+                        }}
+                      />
 
-                  <p className="text-[#7F998C] mt-3 text-sm">
-                    AI respiratory burden monitoring.
-                  </p>
-                </div>
+                      <CircleMarker
+                        key={`marker-${index}`}
+                        center={[zone.lat, zone.lng]}
+                        radius={14 + zone.score / 10}
+                        pathOptions={{
+                          color:
+                            zone.score >= 75
+                              ? "#67C587"
+                              : zone.score >= 50
+                              ? "#FFB86B"
+                              : "#FF7B72",
 
-                <div className="rounded-2xl border border-[#29463A] bg-[#10211A] p-5">
-                  <Factory className="text-[#FF9B86]" />
+                          fillColor:
+                            zone.score >= 75
+                              ? "#67C587"
+                              : zone.score >= 50
+                              ? "#FFB86B"
+                              : "#FF7B72",
 
-                  <h4 className="text-xl font-semibold mt-4">
-                    Industrial Zones
-                  </h4>
+                          fillOpacity: 0.7,
+                          weight: 2,
+                        }}
+                      >
 
-                  <p className="text-[#7F998C] mt-3 text-sm">
-                    Emission-sensitive infrastructure areas.
-                  </p>
-                </div>
+                        <Popup>
 
-                <div className="rounded-2xl border border-[#29463A] bg-[#10211A] p-5">
-                  <Trees className="text-[#8FD8AF]" />
+                          <div className="space-y-2">
 
-                  <h4 className="text-xl font-semibold mt-4">
-                    Green Corridors
-                  </h4>
+                            <h3 className="font-bold">
+                              {zone.district}
+                            </h3>
 
-                  <p className="text-[#7F998C] mt-3 text-sm">
-                    Urban airflow stabilization regions.
-                  </p>
-                </div>
+                            <p>
+                              Score: {zone.score}/100
+                            </p>
+
+                            <p>
+                              Pollution: {zone.pollution}
+                            </p>
+
+                            <p>
+                              Airflow: {zone.airflow}%
+                            </p>
+
+                          </div>
+
+                        </Popup>
+
+                      </CircleMarker>
+                    </>
+
+                  ))}
+
+                </MapContainer>
+
               </div>
-            </div>
 
-            <div className="glass-panel rounded-[32px] p-8">
+              {/* RESULT */}
 
-              <div className="flex items-center gap-5">
+              <div className="mt-6 rounded-[30px] border border-[#29463A] bg-[#07110D]/92 p-6">
 
-                <div className="w-16 h-16 rounded-2xl bg-[#321B1B] flex items-center justify-center">
-                  <ShieldAlert className="text-[#FF9A84]" size={30} />
+                <div className="flex items-center justify-between">
+
+                  <div>
+
+                    <p className="uppercase tracking-[0.18em] text-[#8DAA9C] text-xs">
+                      AI Construction Recommendation
+                    </p>
+
+                    <h3 className="text-3xl font-bold mt-3">
+                      {selectedType} Planning Analysis
+                    </h3>
+
+                    <p className="text-[#8DAA9C] mt-4 leading-relaxed">
+                      Best district for infrastructure deployment:
+                      {" "}
+
+                      <span className="text-[#8FD6A9] font-semibold">
+                        {bestZone.district}
+                      </span>
+
+                      . AI models detected improved airflow stability,
+                      lower pollution accumulation,
+                      and reduced transportation burden.
+                    </p>
+
+                  </div>
+
+                  <div className="text-right">
+
+                    <p className="text-[#8DAA9C] text-sm">
+                      Sustainability Score
+                    </p>
+
+                    <h3
+                      className="text-5xl font-bold mt-3"
+                      style={{
+                        color: decisionColor,
+                      }}
+                    >
+                      {bestZone.score}/100
+                    </h3>
+
+                    <div
+                      className="mt-4 px-5 py-3 rounded-full border text-sm"
+                      style={{
+                        borderColor: decisionColor,
+                        color: decisionColor,
+                      }}
+                    >
+                      {decisionStatus}
+                    </div>
+
+                  </div>
+
                 </div>
 
-                <div>
-                  <p className="uppercase tracking-[0.18em] text-[#C19185] text-sm">
-                    Construction Risk
-                  </p>
-
-                  <h3 className="text-3xl font-bold mt-2">
-                    High Exposure Zone
-                  </h3>
-                </div>
               </div>
 
-              <p className="text-[#A28A84] mt-8 leading-relaxed text-lg">
-                Avoid high-density residential development
-                near elevated traffic emissions in central Gangnam.
-              </p>
             </div>
 
-            <div className="glass-panel rounded-[32px] p-8">
+            {/* BEFORE AFTER */}
 
-              <p className="uppercase tracking-[0.18em] text-[#8CA99B] text-sm">
-                AI Planning Metrics
-              </p>
+            <div className="rounded-[40px] border border-[#29463A] bg-[#08110D] p-8">
 
-              <div className="mt-10 space-y-6">
-
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
-                      Environmental Suitability
-                    </span>
-
-                    <span className="text-[#DDF5E8]">
-                      84%
-                    </span>
-                  </div>
-
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[84%] bg-[#67C587]" />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
-                      Airflow Stability
-                    </span>
-
-                    <span className="text-[#DDF5E8]">
-                      69%
-                    </span>
-                  </div>
-
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[69%] bg-[#5EA4FF]" />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
-                      Population Exposure Risk
-                    </span>
-
-                    <span className="text-[#DDF5E8]">
-                      76%
-                    </span>
-                  </div>
-
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[76%] bg-[#D96C5C]" />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
-                      Infrastructure Sustainability
-                    </span>
-
-                    <span className="text-[#DDF5E8]">
-                      91%
-                    </span>
-                  </div>
-
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[91%] bg-[#8FD8AF]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-panel rounded-[32px] p-8 border border-[#315847]">
-
-              <p className="uppercase tracking-[0.18em] text-[#8FB6A2] text-sm">
-                AI Urban Planning Decision
-              </p>
-
-              <h3 className="text-3xl font-bold mt-6 leading-snug">
-                AI recommends low-density eco-residential expansion
-                in Mapo and Seoul Forest districts,
-                while restricting high-density development
-                in central Gangnam and Jongno corridors.
+              <h3 className="text-4xl font-bold">
+                Before / After Infrastructure Optimization
               </h3>
 
-              <div className="mt-8 flex items-center justify-between">
+              <div className="grid md:grid-cols-3 gap-8 mt-12">
 
-                <span className="text-[#7F988B]">
-                  Decision Confidence
-                </span>
+                <div className="rounded-[30px] border border-[#29463A] bg-[#10211A] p-7">
 
-                <span className="text-[#98E1B9] text-2xl font-bold">
-                  95%
-                </span>
+                  <p className="uppercase text-xs tracking-[0.18em] text-[#8DAA9C]">
+                    PM2.5 Exposure
+                  </p>
+
+                  <div className="flex items-end gap-4 mt-6">
+
+                    <h3 className="text-5xl font-bold text-[#FF7B72]">
+                      {beforePollution}
+                    </h3>
+
+                    <span className="text-3xl">→</span>
+
+                    <h3 className="text-5xl font-bold text-[#67C587]">
+                      {afterPollution}
+                    </h3>
+
+                  </div>
+
+                </div>
+
+                <div className="rounded-[30px] border border-[#29463A] bg-[#10211A] p-7">
+
+                  <p className="uppercase text-xs tracking-[0.18em] text-[#8DAA9C]">
+                    Traffic Burden
+                  </p>
+
+                  <div className="flex items-end gap-4 mt-6">
+
+                    <h3 className="text-5xl font-bold text-[#FFB86B]">
+                      {beforeTraffic}%
+                    </h3>
+
+                    <span className="text-3xl">→</span>
+
+                    <h3 className="text-5xl font-bold text-[#67C587]">
+                      {afterTraffic}%
+                    </h3>
+
+                  </div>
+
+                </div>
+
+                <div className="rounded-[30px] border border-[#29463A] bg-[#10211A] p-7">
+
+                  <p className="uppercase text-xs tracking-[0.18em] text-[#8DAA9C]">
+                    Airflow Stability
+                  </p>
+
+                  <div className="flex items-end gap-4 mt-6">
+
+                    <h3 className="text-5xl font-bold text-[#7BC7FF]">
+                      {beforeAirflow}%
+                    </h3>
+
+                    <span className="text-3xl">→</span>
+
+                    <h3 className="text-5xl font-bold text-[#67C587]">
+                      {afterAirflow}%
+                    </h3>
+
+                  </div>
+
+                </div>
+
               </div>
+
             </div>
+
+            {/* GOVERNMENT AI */}
+
+            <div
+              className="rounded-[40px] p-10 border"
+              style={{
+                borderColor: decisionColor,
+                background:
+                  decisionStatus === "APPROVED"
+                    ? "#08150F"
+                    : decisionStatus === "REVIEW REQUIRED"
+                    ? "#151109"
+                    : "#180B0B",
+              }}
+            >
+
+              <div className="flex items-center justify-between">
+
+                <div>
+
+                  <p className="uppercase tracking-[0.18em] text-[#8DAA9C] text-sm">
+                    Government AI Decision
+                  </p>
+
+                  <h3
+                    className="text-6xl font-bold mt-5"
+                    style={{
+                      color: decisionColor,
+                    }}
+                  >
+                    {decisionStatus}
+                  </h3>
+
+                </div>
+
+                <div
+                  className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold border"
+                  style={{
+                    borderColor: decisionColor,
+                    color: decisionColor,
+                  }}
+                >
+                  {bestZone.score}
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* ANALYTICS */}
+
+            <div className="grid lg:grid-cols-2 gap-10">
+
+              <div className="rounded-[40px] border border-[#29463A] bg-[#08110D] p-10">
+
+                <p className="uppercase tracking-[0.18em] text-[#8DAA9C] text-sm">
+                  AI Sustainability Metrics
+                </p>
+
+                <div className="space-y-8 mt-10">
+
+                  <div>
+
+                    <div className="flex justify-between mb-3">
+
+                      <span className="text-[#8DAA9C]">
+                        Environmental Stability
+                      </span>
+
+                      <span>
+                        {bestZone.airflow}%
+                      </span>
+
+                    </div>
+
+                    <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                      <div
+                        className="h-full bg-[#67C587]"
+                        style={{
+                          width: `${bestZone.airflow}%`,
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                  <div>
+
+                    <div className="flex justify-between mb-3">
+
+                      <span className="text-[#8DAA9C]">
+                        Traffic Burden
+                      </span>
+
+                      <span>
+                        {bestZone.traffic}%
+                      </span>
+
+                    </div>
+
+                    <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                      <div
+                        className="h-full bg-[#FFB86B]"
+                        style={{
+                          width: `${bestZone.traffic}%`,
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                  <div>
+
+                    <div className="flex justify-between mb-3">
+
+                      <span className="text-[#8DAA9C]">
+                        Population Exposure
+                      </span>
+
+                      <span>
+                        {bestZone.populationRisk}%
+                      </span>
+
+                    </div>
+
+                    <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                      <div
+                        className="h-full bg-[#7BC7FF]"
+                        style={{
+                          width: `${bestZone.populationRisk}%`,
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* ACTIONS */}
+
+              <div className="rounded-[40px] border border-[#29463A] bg-[#08110D] p-10">
+
+                <p className="uppercase tracking-[0.18em] text-[#8DAA9C] text-sm">
+                  Government AI Actions
+                </p>
+
+                <div className="space-y-5 mt-10">
+
+                  <div className="rounded-3xl border border-[#5A2323] bg-[#1A0E0E] p-6">
+
+                    <p className="uppercase tracking-[0.18em] text-[#D68B84] text-xs">
+                      Restricted Construction Zone
+                    </p>
+
+                    <h4 className="text-3xl font-bold mt-4">
+                      {worstZone.district}
+                    </h4>
+
+                    <p className="text-[#BFA8A3] mt-5 leading-relaxed">
+                      AI detected elevated pollution exposure,
+                      transportation burden,
+                      and vulnerable population risk levels.
+                    </p>
+
+                  </div>
+
+                  <div className="rounded-3xl border border-[#29463A] bg-[#10211A] p-6">
+                    Restrict heavy logistics traffic near educational corridors.
+                  </div>
+
+                  <div className="rounded-3xl border border-[#29463A] bg-[#10211A] p-6">
+                    Expand rooftop vegetation requirements.
+                  </div>
+
+                  <div className="rounded-3xl border border-[#29463A] bg-[#10211A] p-6">
+                    Increase airflow stabilization systems near Han River districts.
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
+
         </div>
+
       </div>
+
     </section>
   );
 }

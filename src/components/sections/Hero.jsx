@@ -1,221 +1,225 @@
 export default function Hero() {
+
   return (
-    <section className="relative min-h-screen overflow-hidden pt-[140px]">
+    <section className="relative min-h-screen overflow-hidden pt-32">
 
-      <div className="absolute inset-0 grid-overlay opacity-40" />
+      <div className="absolute inset-0 grid-overlay opacity-20" />
 
-      <div className="absolute top-[120px] left-[10%] w-[420px] h-[420px] rounded-full bg-[#214437] blur-[120px] opacity-20" />
+      <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] rounded-full bg-[#1B3B30] blur-[160px] opacity-25" />
 
-      <div className="absolute bottom-[120px] right-[10%] w-[520px] h-[520px] rounded-full bg-[#2A5644] blur-[140px] opacity-20" />
+      <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#143026] blur-[160px] opacity-25" />
 
       <div className="section-container relative z-10">
 
-        <div className="grid lg:grid-cols-2 gap-20 items-center min-h-[85vh]">
-
-          {/* LEFT */}
+        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-20 items-center">
 
           <div>
 
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full border border-[#274539] bg-[#10211A]/70 text-[#9FCDB6] text-sm tracking-[0.2em] uppercase">
-
-              <div className="w-3 h-3 rounded-full bg-[#69C88A] animate-pulse" />
-
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full border border-[#29463A] bg-[#10211A]/70 text-[#90B9A4] text-sm uppercase tracking-[0.2em]">
               Seoul Metropolitan Environmental AI Network
             </div>
 
-            <h1 className="text-7xl leading-[1.02] font-bold mt-10 tracking-[-0.05em] max-w-5xl">
+            <h1 className="text-[88px] leading-[0.92] tracking-[-0.06em] font-bold mt-10 max-w-5xl">
+
               AI Urban Planning &
-              <span className="text-[#8FD8AF]">
-                {" "}Pollution Mitigation
+
+              <span className="block text-[#8FD6A9]">
+                Pollution Mitigation
               </span>
-              {" "}Platform
+
+              Platform
+
             </h1>
 
-            <p className="mt-10 text-2xl leading-relaxed text-[#8AA497] max-w-3xl">
+            <p className="text-[#8AA398] text-2xl leading-relaxed max-w-3xl mt-10">
+
               Government-grade environmental intelligence platform
               for PM2.5 forecasting, vulnerable population protection,
               infrastructure optimization, and AI-driven urban policy
               simulation across Seoul.
-            </p>
 
-            {/* BUTTONS */}
+            </p>
 
             <div className="flex flex-wrap gap-5 mt-14">
 
-              <button
-                onClick={() => {
-                  document
-                    .getElementById("analytics")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                }}
-                className="px-10 py-5 rounded-[28px] bg-[#2A5A45] border border-[#3F7259] text-[#E4F7ED] text-lg font-medium transition-all duration-300 hover:scale-[1.03] hover:bg-[#336B53] shadow-[0_0_50px_rgba(69,140,101,0.18)]"
+              <a
+                href="#live-map"
+                className="inline-flex items-center justify-center px-10 py-5 rounded-[22px] bg-[#5FA57B] hover:bg-[#74BC91] transition-all duration-300 text-white font-semibold text-lg shadow-[0_10px_40px_rgba(95,165,123,0.35)]"
               >
-                Open Command Dashboard
-              </button>
+                Open Live Seoul Map
+              </a>
 
-              <button
-                onClick={() => {
-                  document
-                    .getElementById("live-map")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                }}
-                className="px-10 py-5 rounded-[28px] border border-[#29463A] bg-[#0E1915]/80 text-[#B6D5C5] text-lg font-medium transition-all duration-300 hover:bg-[#14231D] hover:border-[#3B6450]"
+              <a
+                href="#government-planning"
+                className="inline-flex items-center justify-center px-10 py-5 rounded-[22px] border border-[#29463A] bg-[#10211A] hover:bg-[#163126] transition-all duration-300 text-white font-semibold text-lg"
               >
-                View Live Seoul Heatmap
-              </button>
+                Open AI Planning Engine
+              </a>
+
             </div>
-
-            {/* STATS */}
 
             <div className="grid grid-cols-3 gap-6 mt-20">
 
-              <div className="glass-panel rounded-[28px] p-6 card-hover">
+              <div className="glass-panel rounded-[30px] p-8">
 
-                <p className="text-[#729283] uppercase tracking-[0.18em] text-sm">
-                  PM2.5 ALERTS
+                <p className="uppercase tracking-[0.18em] text-[#7F9D8F] text-sm">
+                  PM2.5 Alerts
                 </p>
 
-                <h3 className="text-5xl font-bold mt-5 text-[#E4F7ED]">
-                  12
+                <h3 className="text-6xl font-bold mt-6">
+                  48
                 </h3>
 
-                <p className="mt-4 text-[#6E8E80]">
-                  Active district warnings
+                <p className="text-[#7E988C] mt-5 text-lg leading-relaxed">
+                  Live pollution alerts across Seoul
                 </p>
+
               </div>
 
-              <div className="glass-panel rounded-[28px] p-6 card-hover">
+              <div className="glass-panel rounded-[30px] p-8">
 
-                <p className="text-[#729283] uppercase tracking-[0.18em] text-sm">
-                  AI MODELS
+                <p className="uppercase tracking-[0.18em] text-[#7F9D8F] text-sm">
+                  AI Models
                 </p>
 
-                <h3 className="text-5xl font-bold mt-5 text-[#E4F7ED]">
-                  28
+                <h3 className="text-6xl font-bold mt-6">
+                  112
                 </h3>
 
-                <p className="mt-4 text-[#6E8E80]">
-                  Predictive systems running
+                <p className="text-[#7E988C] mt-5 text-lg leading-relaxed">
+                  Government AI forecasting systems
                 </p>
+
               </div>
 
-              <div className="glass-panel rounded-[28px] p-6 card-hover">
+              <div className="glass-panel rounded-[30px] p-8">
 
-                <p className="text-[#729283] uppercase tracking-[0.18em] text-sm">
-                  DISTRICTS
+                <p className="uppercase tracking-[0.18em] text-[#7F9D8F] text-sm">
+                  Districts
                 </p>
 
-                <h3 className="text-5xl font-bold mt-5 text-[#E4F7ED]">
-                  25
+                <h3 className="text-6xl font-bold mt-6">
+                  76
                 </h3>
 
-                <p className="mt-4 text-[#6E8E80]">
-                  Seoul districts monitored
+                <p className="text-[#7E988C] mt-5 text-lg leading-relaxed">
+                  Infrastructure and mobility zones
                 </p>
+
               </div>
+
             </div>
+
           </div>
 
-          {/* RIGHT */}
+          {/* right visualization */}
 
           <div className="relative">
 
-            <div className="glass-panel rounded-[40px] p-8 command-glow">
+            <div className="glass-panel rounded-[50px] p-10 relative overflow-hidden">
 
-              <div className="flex items-center justify-between mb-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(95,165,123,0.15),transparent_70%)]" />
+
+              <div className="flex items-center justify-between">
 
                 <div>
-                  <p className="uppercase tracking-[0.18em] text-sm text-[#7FA892]">
+
+                  <p className="uppercase tracking-[0.18em] text-[#82A796] text-sm">
                     Seoul AI Monitoring Grid
                   </p>
 
-                  <h3 className="text-3xl font-bold mt-3">
+                  <h3 className="text-5xl font-bold mt-5">
                     Real-Time Urban Intelligence
                   </h3>
+
                 </div>
 
-                <div className="px-4 py-2 rounded-full bg-[#173229] border border-[#315847] text-[#A8D1BB] text-sm">
+                <div className="px-5 py-3 rounded-full border border-[#355847] bg-[#12211A] text-[#A4D1B8] text-sm">
                   LIVE
                 </div>
+
               </div>
 
-              <div className="relative h-[620px] rounded-[32px] overflow-hidden bg-[#0B1612] border border-[#1E352B]">
+              <div className="relative h-[580px] mt-12 rounded-[36px] overflow-hidden border border-[#21382E] bg-[#08110D]">
 
                 <div className="absolute inset-0 grid-overlay opacity-20" />
 
-                {/* HEAT ZONES */}
+                {/* glowing zones */}
 
-                <div className="absolute top-[100px] left-[140px] w-28 h-28 rounded-full bg-[#D96C5C]/70 blur-xl" />
+                <div className="absolute top-[120px] left-[140px] w-44 h-44 rounded-full bg-[#D75E52]/70 blur-[50px]" />
 
-                <div className="absolute top-[240px] right-[160px] w-24 h-24 rounded-full bg-[#D96C5C]/70 blur-xl" />
+                <div className="absolute bottom-[120px] left-[300px] w-52 h-52 rounded-full bg-[#4F8E69]/70 blur-[50px]" />
 
-                <div className="absolute bottom-[140px] left-[240px] w-32 h-32 rounded-full bg-[#6FA58C]/70 blur-xl" />
+                <div className="absolute top-[240px] right-[120px] w-40 h-40 rounded-full bg-[#D75E52]/70 blur-[50px]" />
 
-                {/* AI ROUTE */}
+                <div className="absolute top-[320px] left-[360px] w-40 h-40 rounded-full bg-[#8FD6A9]/70 blur-[50px]" />
+
+                {/* connection line */}
 
                 <svg
                   className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 800 620"
+                  viewBox="0 0 1000 580"
                 >
+
                   <path
-                    d="M100 520 C240 420, 320 380, 450 280 C580 180, 660 140, 760 80"
-                    stroke="#6FA58C"
+                    d="M160 500 C300 400, 420 320, 520 260 C650 180, 780 120, 900 60"
+                    stroke="#A7D8BE"
                     strokeWidth="10"
                     fill="none"
-                    strokeDasharray="20 18"
+                    strokeDasharray="18 18"
                     strokeLinecap="round"
                   />
+
                 </svg>
 
-                {/* TOP CARD */}
+                {/* floating cards */}
 
-                <div className="absolute top-12 left-12 glass-panel rounded-2xl px-5 py-4">
+                <div className="absolute top-[60px] left-[60px] glass-panel px-8 py-6 rounded-[26px]">
 
-                  <p className="text-[#8FB6A2] text-sm uppercase tracking-[0.18em]">
+                  <p className="uppercase tracking-[0.18em] text-[#88A89A] text-sm">
                     Gangnam
                   </p>
 
-                  <h4 className="text-2xl font-bold mt-2">
+                  <h4 className="text-4xl font-bold mt-4">
                     High Exposure
                   </h4>
+
                 </div>
 
-                {/* RIGHT CARD */}
+                <div className="absolute bottom-[50px] left-[60px] glass-panel px-8 py-6 rounded-[26px]">
 
-                <div className="absolute bottom-12 right-12 glass-panel rounded-2xl px-5 py-4">
-
-                  <p className="text-[#8FB6A2] text-sm uppercase tracking-[0.18em]">
-                    Vulnerable Layer
-                  </p>
-
-                  <h4 className="text-2xl font-bold mt-2">
-                    Schools + Hospitals
-                  </h4>
-                </div>
-
-                {/* LEFT CARD */}
-
-                <div className="absolute bottom-12 left-12 glass-panel rounded-2xl px-5 py-4">
-
-                  <p className="text-[#8FB6A2] text-sm uppercase tracking-[0.18em]">
+                  <p className="uppercase tracking-[0.18em] text-[#88A89A] text-sm">
                     AI Forecast
                   </p>
 
-                  <h4 className="text-2xl font-bold mt-2 text-[#8FD8AF]">
+                  <h4 className="text-4xl font-bold mt-4 text-[#8FD6A9]">
                     Stable Airflow
                   </h4>
+
+                </div>
+
+                <div className="absolute bottom-[50px] right-[50px] glass-panel px-8 py-6 rounded-[26px]">
+
+                  <p className="uppercase tracking-[0.18em] text-[#88A89A] text-sm">
+                    Vulnerable Layer
+                  </p>
+
+                  <h4 className="text-4xl font-bold mt-4">
+                    Schools + Hospitals
+                  </h4>
+
                 </div>
 
               </div>
+
             </div>
+
           </div>
 
         </div>
+
       </div>
+
     </section>
   );
 }

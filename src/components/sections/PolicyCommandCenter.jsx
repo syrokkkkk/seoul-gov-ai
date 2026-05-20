@@ -1,68 +1,114 @@
+import { useState } from "react";
+
 import {
-  ShieldAlert,
-  Building2,
-  TrafficCone,
+  Shield,
   Trees,
-  Activity,
+  Building2,
   Siren,
 } from "lucide-react";
 
-const actions = [
+const initialPolicies = [
   {
-    icon: <TrafficCone size={28} />,
+    id: 1,
     title: "Reduce Gangnam Traffic Volume",
-    status: "Recommended",
     impact: "-18% PM2.5",
     priority: "High",
+    status: "Recommended",
+    icon: <Building2 size={18} />,
   },
+
   {
-    icon: <Trees size={28} />,
+    id: 2,
     title: "Expand Green Corridor Network",
-    status: "Approved",
     impact: "-11% Exposure",
     priority: "Medium",
+    status: "Approved",
+    icon: <Trees size={18} />,
   },
+
   {
-    icon: <Building2 size={28} />,
+    id: 3,
     title: "Delay Central Construction Activity",
-    status: "Critical",
     impact: "-9% Pollution",
     priority: "High",
+    status: "Critical",
+    icon: <Shield size={18} />,
   },
+
   {
-    icon: <ShieldAlert size={28} />,
+    id: 4,
     title: "Activate School Protection Protocol",
-    status: "Active",
     impact: "42 Schools Protected",
     priority: "Critical",
-  },
-];
-
-const alerts = [
-  {
-    district: "Jongno",
-    message: "PM2.5 spike detected near hospital corridor.",
-    level: "Critical",
-  },
-  {
-    district: "Mapo",
-    message: "Optimal airflow conditions for eco-development.",
-    level: "Stable",
-  },
-  {
-    district: "Gangnam",
-    message: "Traffic emissions exceeded AI threshold.",
-    level: "Warning",
+    status: "Active",
+    icon: <Siren size={18} />,
   },
 ];
 
 export default function PolicyCommandCenter() {
+
+  const [policies, setPolicies] =
+    useState(initialPolicies);
+
+  const [logs, setLogs] =
+    useState([
+      "[AI SYSTEM] Seoul environmental network initialized.",
+    ]);
+
+  const [metrics, setMetrics] =
+    useState({
+      mitigation: 82,
+      stability: 71,
+      exposure: 64,
+    });
+
+  const executePolicy = (id, title) => {
+
+    setPolicies((prev) =>
+      prev.map((policy) =>
+        policy.id === id
+          ? {
+              ...policy,
+              deployed: true,
+            }
+          : policy
+      )
+    );
+
+    setMetrics((prev) => ({
+      mitigation: Math.min(
+        100,
+        prev.mitigation + 4
+      ),
+
+      stability: Math.min(
+        100,
+        prev.stability + 3
+      ),
+
+      exposure: Math.min(
+        100,
+        prev.exposure + 5
+      ),
+    }));
+
+    setLogs((prev) => [
+      `[AI SYSTEM] ${title} deployed successfully.`,
+      ...prev,
+    ]);
+  };
+
   return (
-    <section className="relative py-32">
 
-      <div className="section-container">
+    <section className="relative py-32 overflow-hidden">
 
-        <div className="flex items-center justify-between flex-wrap gap-8">
+      <div className="absolute inset-0 grid-overlay opacity-20" />
+
+      <div className="section-container relative z-10">
+
+        <div className="grid lg:grid-cols-[1fr_420px] gap-12">
+
+          {/* LEFT */}
 
           <div>
 
@@ -70,191 +116,267 @@ export default function PolicyCommandCenter() {
               AI Policy Command Center
             </div>
 
-            <h2 className="text-6xl font-bold mt-8 tracking-[-0.04em] max-w-4xl">
-              Real-Time Government Pollution Response Infrastructure
+            <h2 className="text-6xl font-bold mt-8 tracking-[-0.04em] leading-tight max-w-5xl">
+              Real-Time Government Pollution
+              Response Infrastructure
             </h2>
+
+            <p className="text-[#80998D] text-xl max-w-3xl mt-8 leading-relaxed">
+              AI-driven environmental response system
+              for urban mitigation, sustainability stabilization,
+              and vulnerable population protection.
+            </p>
+
+            {/* POLICIES */}
+
+            <div className="space-y-6 mt-16">
+
+              {policies.map((policy) => (
+
+                <div
+                  key={policy.id}
+                  className={`rounded-[30px] border p-6 transition-all duration-500 ${
+                    policy.deployed
+                      ? "border-[#67C587] bg-[#0E1B14]"
+                      : "border-[#29463A] bg-[#08110D]"
+                  }`}
+                >
+
+                  <div className="flex items-center justify-between gap-6">
+
+                    <div className="flex items-center gap-5">
+
+                      <div
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${
+                          policy.deployed
+                            ? "border-[#67C587] text-[#67C587]"
+                            : "border-[#29463A] text-[#8FD6A9]"
+                        }`}
+                      >
+                        {policy.icon}
+                      </div>
+
+                      <div>
+
+                        <div className="flex items-center gap-3 flex-wrap">
+
+                          <h3 className="text-2xl font-bold">
+                            {policy.title}
+                          </h3>
+
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs uppercase tracking-[0.14em] border ${
+                              policy.deployed
+                                ? "border-[#67C587] text-[#67C587]"
+                                : "border-[#29463A] text-[#8FD6A9]"
+                            }`}
+                          >
+                            {policy.deployed
+                              ? "DEPLOYED"
+                              : policy.status}
+                          </div>
+
+                        </div>
+
+                        <div className="flex gap-6 mt-4 text-sm text-[#8DAA9C]">
+
+                          <span>
+                            Impact:
+                            {" "}
+                            {policy.impact}
+                          </span>
+
+                          <span>
+                            Priority:
+                            {" "}
+                            {policy.priority}
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    <button
+                      disabled={policy.deployed}
+                      onClick={() =>
+                        executePolicy(
+                          policy.id,
+                          policy.title
+                        )
+                      }
+                      className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+                        policy.deployed
+                          ? "bg-[#173127] text-[#67C587] cursor-default"
+                          : "bg-[#8FD6A9] text-[#07110D] hover:scale-105"
+                      }`}
+                    >
+                      {policy.deployed
+                        ? "Deployed"
+                        : "Execute"}
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
           </div>
 
-          <div className="glass-panel rounded-[28px] px-8 py-6 border border-[#29463A]">
+          {/* RIGHT */}
 
-            <div className="flex items-center gap-4">
+          <div className="space-y-8">
 
-              <div className="w-4 h-4 rounded-full bg-[#6DDB8B] animate-pulse" />
+            {/* AI STATUS */}
 
-              <div>
-                <p className="text-[#DDF5E8] font-semibold">
+            <div className="rounded-[32px] border border-[#29463A] bg-[#08110D] p-8">
+
+              <div className="flex items-center gap-3">
+
+                <div className="w-3 h-3 rounded-full bg-[#67FFB3] animate-pulse" />
+
+                <p className="text-[#8FD6A9] font-semibold">
                   AI Decision Engine Online
                 </p>
 
-                <p className="text-[#7C968A] text-sm mt-1">
-                  Seoul Metropolitan Environmental Network
-                </p>
               </div>
+
+              <p className="text-[#8DAA9C] mt-4">
+                Seoul Metropolitan Environmental Network
+              </p>
+
             </div>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-[1.3fr_0.7fr] gap-10 mt-20">
+            {/* LIVE INCIDENT FEED */}
 
-          <div className="space-y-8">
+            <div className="rounded-[32px] border border-[#29463A] bg-[#08110D] p-8">
 
-            {actions.map((action) => (
-              <div
-                key={action.title}
-                className="glass-panel rounded-[34px] p-8 border border-[#22372E]"
-              >
-                <div className="flex items-start justify-between gap-8">
+              <h3 className="text-2xl font-bold">
+                Live AI Deployment Feed
+              </h3>
 
-                  <div className="flex gap-6">
+              <div className="space-y-4 mt-8 max-h-[320px] overflow-y-auto">
 
-                    <div className="w-16 h-16 rounded-2xl bg-[#10211A] border border-[#29463A] flex items-center justify-center text-[#9ED8B6]">
-                      {action.icon}
-                    </div>
+                {logs.map((log, index) => (
 
-                    <div>
-
-                      <div className="flex items-center gap-3 flex-wrap">
-
-                        <h3 className="text-2xl font-bold">
-                          {action.title}
-                        </h3>
-
-                        <span className="px-3 py-1 rounded-full bg-[#13261E] border border-[#315847] text-[#8FD8AF] text-sm">
-                          {action.status}
-                        </span>
-                      </div>
-
-                      <div className="flex gap-6 mt-5 text-[#80998D]">
-
-                        <div>
-                          Impact:
-                          <span className="text-[#DDF5E8] ml-2">
-                            {action.impact}
-                          </span>
-                        </div>
-
-                        <div>
-                          Priority:
-                          <span className="text-[#DDF5E8] ml-2">
-                            {action.priority}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button className="px-6 py-3 rounded-2xl bg-[#8FD8AF] text-[#07110D] font-semibold hover:scale-105 transition-all duration-300">
-                    Execute
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-8">
-
-            <div className="glass-panel rounded-[34px] p-8 border border-[#22372E]">
-
-              <div className="flex items-center gap-4">
-
-                <Siren className="text-[#D96C5C]" />
-
-                <h3 className="text-2xl font-bold">
-                  Live Incident Feed
-                </h3>
-              </div>
-
-              <div className="space-y-6 mt-10">
-
-                {alerts.map((alert) => (
                   <div
-                    key={alert.message}
-                    className="p-5 rounded-2xl border border-[#29463A] bg-[#0C1713]"
+                    key={index}
+                    className="rounded-2xl border border-[#29463A] bg-[#10211A] p-4 text-[#8FD6A9] text-sm"
                   >
-                    <div className="flex items-center justify-between">
-
-                      <p className="font-semibold text-[#DDF5E8]">
-                        {alert.district}
-                      </p>
-
-                      <span className="text-sm text-[#8FB6A2]">
-                        {alert.level}
-                      </span>
-                    </div>
-
-                    <p className="text-[#7F998D] mt-3 leading-relaxed">
-                      {alert.message}
-                    </p>
+                    {log}
                   </div>
+
                 ))}
+
               </div>
+
             </div>
 
-            <div className="glass-panel rounded-[34px] p-8 border border-[#22372E]">
+            {/* METRICS */}
 
-              <div className="flex items-center gap-4">
+            <div className="rounded-[32px] border border-[#29463A] bg-[#08110D] p-8">
 
-                <Activity className="text-[#8FD8AF]" />
+              <h3 className="text-2xl font-bold">
+                AI Response Status
+              </h3>
 
-                <h3 className="text-2xl font-bold">
-                  AI Response Status
-                </h3>
-              </div>
-
-              <div className="space-y-7 mt-10">
+              <div className="space-y-8 mt-10">
 
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
+
+                  <div className="flex justify-between mb-3">
+
+                    <span className="text-[#8DAA9C]">
                       Mitigation Efficiency
                     </span>
 
-                    <span className="text-[#DDF5E8]">
-                      82%
+                    <span>
+                      {metrics.mitigation}%
                     </span>
+
                   </div>
 
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[82%] bg-[#8FD8AF]" />
+                  <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                    <div
+                      className="h-full bg-[#8FD6A9] transition-all duration-700"
+                      style={{
+                        width: `${metrics.mitigation}%`,
+                      }}
+                    />
+
                   </div>
+
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
+
+                  <div className="flex justify-between mb-3">
+
+                    <span className="text-[#8DAA9C]">
                       District Stability
                     </span>
 
-                    <span className="text-[#DDF5E8]">
-                      71%
+                    <span>
+                      {metrics.stability}%
                     </span>
+
                   </div>
 
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[71%] bg-[#5EA4FF]" />
+                  <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                    <div
+                      className="h-full bg-[#7BC7FF] transition-all duration-700"
+                      style={{
+                        width: `${metrics.stability}%`,
+                      }}
+                    />
+
                   </div>
+
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#80998D]">
+
+                  <div className="flex justify-between mb-3">
+
+                    <span className="text-[#8DAA9C]">
                       Exposure Reduction
                     </span>
 
-                    <span className="text-[#DDF5E8]">
-                      64%
+                    <span>
+                      {metrics.exposure}%
                     </span>
+
                   </div>
 
-                  <div className="h-3 rounded-full bg-[#13211B] overflow-hidden">
-                    <div className="h-full w-[64%] bg-[#D96C5C]" />
+                  <div className="h-3 rounded-full bg-[#10211A] overflow-hidden">
+
+                    <div
+                      className="h-full bg-[#FF7B72] transition-all duration-700"
+                      style={{
+                        width: `${metrics.exposure}%`,
+                      }}
+                    />
+
                   </div>
+
                 </div>
+
               </div>
+
             </div>
+
           </div>
+
         </div>
+
       </div>
+
     </section>
   );
 }
